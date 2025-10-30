@@ -680,14 +680,9 @@
         let timerInterval;
         let isCurrentShort = false;
 
-        // 숫자 포맷팅 함수 (1000 -> 1K, 1000000 -> 1M)
+        // 숫자 포맷팅 함수 (1234 -> 1,234)
         function formatNumber(num) {
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            } else if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            }
-            return num.toString();
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
 
         // YouTube API로 통계 가져오기
