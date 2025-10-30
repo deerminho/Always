@@ -186,63 +186,9 @@
         .video-title {
             font-size: 24px;
             font-weight: 800;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             color: #2d3436;
             line-height: 1.3;
-        }
-
-        /* 🆕 통계 컨테이너 */
-        .stats-container {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .stat-box {
-            flex: 1;
-            min-width: 120px;
-            background: linear-gradient(135deg, rgba(0, 206, 201, 0.06) 0%, rgba(168, 230, 206, 0.06) 100%);
-            padding: 12px 16px;
-            border-radius: 14px;
-            border: 2px solid rgba(0, 206, 201, 0.15);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .stat-box:hover {
-            background: linear-gradient(135deg, rgba(0, 206, 201, 0.1) 0%, rgba(168, 230, 206, 0.1) 100%);
-            border-color: rgba(0, 206, 201, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .stat-icon {
-            font-size: 20px;
-            opacity: 0.8;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: #636e72;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 18px;
-            font-weight: 800;
-            color: #00CEC9;
-            letter-spacing: -0.5px;
-        }
-
-        .stat-box.loading .stat-value {
-            color: #b2bec3;
-            font-size: 14px;
-            font-weight: 600;
         }
         
         .timer-box {
@@ -478,7 +424,6 @@
 
             .video-title {
                 font-size: 18px;
-                margin-bottom: 14px;
             }
 
             .now-playing {
@@ -488,28 +433,6 @@
             .shorts-indicator {
                 font-size: 10px;
                 padding: 3px 10px;
-            }
-
-            /* 모바일 통계 최적화 */
-            .stats-container {
-                gap: 10px;
-            }
-
-            .stat-box {
-                min-width: 100px;
-                padding: 10px 12px;
-            }
-
-            .stat-icon {
-                font-size: 18px;
-            }
-
-            .stat-label {
-                font-size: 10px;
-            }
-
-            .stat-value {
-                font-size: 16px;
             }
 
             .timer-box {
@@ -627,26 +550,6 @@
                     <span class="shorts-indicator" id="shortsIndicator" style="display: none;">SHORTS</span>
                 </div>
                 <div class="video-title" id="videoTitle">로딩 중...</div>
-                
-                <!-- 🆕 통계 컨테이너 -->
-                <div class="stats-container" id="statsContainer">
-                    <div class="stat-box loading">
-                        <div class="stat-icon">👁️</div>
-                        <div class="stat-label">조회수</div>
-                        <div class="stat-value" id="viewCount">로딩중</div>
-                    </div>
-                    <div class="stat-box loading">
-                        <div class="stat-icon">👍</div>
-                        <div class="stat-label">좋아요</div>
-                        <div class="stat-value" id="likeCount">로딩중</div>
-                    </div>
-                    <div class="stat-box loading">
-                        <div class="stat-icon">💬</div>
-                        <div class="stat-label">댓글</div>
-                        <div class="stat-value" id="commentCount">로딩중</div>
-                    </div>
-                </div>
-
                 <div class="timer-box" id="timerBox">
                     <span id="timerText">다음곡까지<span class="timer-number" id="countdown">00:00</span></span>
                 </div>
@@ -660,17 +563,15 @@
     </div>
 
     <script>
-        const API_KEY = 'AIzaSyCKHjMBHsbYVWDyv5jhx4dMJEJXU8ZfPQA';
-
         const videos = [
             { id: 'uV8KpDCkhds', title: '뭘 하면 좋을 지 댓글로 추천해 주세요', isShort: true },
             { id: 'mWRsIldtV1k', title: '채널 비하인드', isShort: true },
             { id: '0q9tgaWDLAk', title: '장민호가 평양냉면을 먹는 이유', isShort: true },
-            { id: 'yluKcIVKAss', title: '[모집티저] 국보급 얼굴 MC 장민호', isShort: true },
             { id: '15X0nd1_-kI', title: '발소리👞 쾌감 찢었다 홀로된사랑', isShort: true },
             { id: 'v_3hazNandw', title: '홀로된 사랑 (Lonely Love) 안무 버전', isShort: false },
             { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV', isShort: false },
-            { id: 'nczfiJBMA2U', title: '내게 남은 사랑을 드릴께요', isShort: false },
+            { id: 'nczfiJBMA2U', title: '내게 남은 사랑을 드릴께요(I'll Give You the Love I Have Left) Official MV', isShort: false },
+            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE', isShort: false  },
             { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', isShort: false }
         ];
 
@@ -679,62 +580,6 @@
         let countdown = 0;
         let timerInterval;
         let isCurrentShort = false;
-
-        // 숫자 포맷팅 함수 (1234 -> 1,234)
-        function formatNumber(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        }
-
-        // YouTube API로 통계 가져오기
-        async function fetchVideoStats(videoId) {
-            try {
-                const response = await fetch(
-                    `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoId}&key=${API_KEY}`
-                );
-                const data = await response.json();
-                
-                if (data.items && data.items.length > 0) {
-                    const stats = data.items[0].statistics;
-                    return {
-                        viewCount: parseInt(stats.viewCount) || 0,
-                        likeCount: parseInt(stats.likeCount) || 0,
-                        commentCount: parseInt(stats.commentCount) || 0
-                    };
-                }
-                return null;
-            } catch (error) {
-                console.error('통계 가져오기 실패:', error);
-                return null;
-            }
-        }
-
-        // 통계 업데이트
-        async function updateVideoStats(videoId) {
-            // 로딩 상태로 설정
-            document.querySelectorAll('.stat-box').forEach(box => {
-                box.classList.add('loading');
-            });
-            document.getElementById('viewCount').textContent = '로딩중';
-            document.getElementById('likeCount').textContent = '로딩중';
-            document.getElementById('commentCount').textContent = '로딩중';
-
-            const stats = await fetchVideoStats(videoId);
-            
-            if (stats) {
-                document.getElementById('viewCount').textContent = formatNumber(stats.viewCount);
-                document.getElementById('likeCount').textContent = formatNumber(stats.likeCount);
-                document.getElementById('commentCount').textContent = formatNumber(stats.commentCount);
-                
-                // 로딩 상태 해제
-                document.querySelectorAll('.stat-box').forEach(box => {
-                    box.classList.remove('loading');
-                });
-            } else {
-                document.getElementById('viewCount').textContent = 'N/A';
-                document.getElementById('likeCount').textContent = 'N/A';
-                document.getElementById('commentCount').textContent = 'N/A';
-            }
-        }
 
         function getRandomDuration(isShort) {
             if (isShort) {
@@ -786,6 +631,7 @@
             const videoWrapper = document.getElementById('videoWrapper');
             const shortsIndicator = document.getElementById('shortsIndicator');
             const timerBox = document.getElementById('timerBox');
+            const countdown = document.getElementById('countdown');
 
             if (isCurrentShort) {
                 videoWrapper.classList.add('shorts-mode');
@@ -800,9 +646,6 @@
             document.getElementById('videoFrame').src = 
                 `https://www.youtube.com/embed/${video.id}?autoplay=1&controls=1&rel=0`;
             document.getElementById('videoTitle').textContent = video.title;
-
-            // 🆕 통계 업데이트
-            updateVideoStats(video.id);
 
             if (isCurrentShort) {
                 if (timerInterval) clearInterval(timerInterval);
@@ -865,3 +708,5 @@
     </script>
 </body>
 </html>
+
+
