@@ -62,15 +62,15 @@
         }
         
         /* 클로버 - 행운의 하루 */
-    .header::before {
-    content: '🍀';
-    position: absolute;
-    font-size: 100px;
-    opacity: 0.08;
-    top: -15px;
-    left: 30px;
-    animation: twinkle 3s ease-in-out infinite;
-     }
+        .header::before {
+            content: '🍀';
+            position: absolute;
+            font-size: 100px;
+            opacity: 0.08;
+            top: -15px;
+            left: 30px;
+            animation: twinkle 3s ease-in-out infinite;
+        }
         
         .header::after {
             content: '🎵';
@@ -125,6 +125,32 @@
             height: 0;
             overflow: hidden;
             background: #000;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        /* 영상 클릭 힌트 */
+        .video-wrapper::after {
+            content: '🔇 탭하여 소리 켜기';
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            pointer-events: none;
+            opacity: 0;
+            animation: hint-fade 3s ease-in-out 1s;
+            z-index: 10;
+        }
+
+        @keyframes hint-fade {
+            0%, 100% { opacity: 0; }
+            20%, 80% { opacity: 1; }
         }
 
         /* 쇼츠 전용 비디오 래퍼 - PC 최적화 */
@@ -279,15 +305,6 @@
             box-shadow: 
                 0 -5px 20px rgba(0, 206, 201, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.8);
-        }
-        
-        .section-title {
-            font-size: 26px;
-            font-weight: 800;
-            color: #2d3436;
-            margin-bottom: 25px;
-            text-align: center;
-            letter-spacing: -0.5px;
         }
         
         .playlist-container {
@@ -480,6 +497,12 @@
                 max-width: 100%;
             }
 
+            .video-wrapper::after {
+                font-size: 12px;
+                padding: 8px 16px;
+                bottom: 15px;
+            }
+
             .video-info {
                 padding: 20px 15px;
             }
@@ -522,11 +545,6 @@
             .stats-section {
                 padding: 25px 15px;
                 border-radius: 0 0 20px 20px;
-            }
-
-            .section-title {
-                font-size: 20px;
-                margin-bottom: 20px;
             }
 
             .playlist-container {
@@ -642,7 +660,6 @@
         </div>
 
         <div class="stats-section">
-            <div class="section-title">🎼 재생목록 (총 9곡)</div>
             <div class="playlist-container" id="songGrid"></div>
         </div>
     </div>
@@ -650,13 +667,13 @@
     <!-- YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
 
-   <script>
+    <script>
         const videos = [
             { id: 'v_3hazNandw', title: '홀로된 사랑 (Lonely Love) 안무 버전', isShort: false },
             { id: 'WErpzFpA7XM', title: '장하다 장민호 EP.01', isShort: false },
             { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV', isShort: false },
             { id: 'nczfiJBMA2U', title: '내게 남은 사랑을 드릴께요 Official MV', isShort: false },
-            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE', isShort: false  },
+            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE', isShort: false },
             { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', isShort: false }
         ];
 
@@ -666,10 +683,10 @@
         let countdown = 0;
         let timerInterval;
         let isCurrentShort = false;
+        let userInteracted = false;
 
         // YouTube IFrame API 준비
         function onYouTubeIframeAPIReady() {
-            // 초기 플레이어 생성 (비어있음)
             player = new YT.Player('player', {
                 height: '100%',
                 width: '100%',
@@ -678,7 +695,9 @@
                     autoplay: 1,
                     controls: 1,
                     rel: 0,
-                    modestbranding: 1
+                    modestbranding: 1,
+                    mute: 1,
+                    playsinline: 1
                 },
                 events: {
                     'onReady': onPlayerReady,
@@ -690,16 +709,33 @@
         function onPlayerReady(event) {
             // 저장된 볼륨 불러오기
             const savedVolume = localStorage.getItem('playlistVolume') || 50;
-            player.setVolume(savedVolume);
             document.getElementById('volumeSlider').value = savedVolume;
             document.getElementById('volumeDisplay').textContent = savedVolume + '%';
             updateVolumeSliderBackground(savedVolume);
+
+            // 영상 영역 클릭 이벤트 추가
+            const videoWrapper = document.getElementById('videoWrapper');
+            videoWrapper.addEventListener('click', function() {
+                if (!userInteracted) {
+                    userInteracted = true;
+                    player.unMute();
+                    player.setVolume(savedVolume);
+                    // 비주얼 피드백
+                    this.style.opacity = '0.95';
+                    setTimeout(() => {
+                        this.style.opacity = '1';
+                    }, 200);
+                }
+            });
 
             // 볼륨 슬라이더 이벤트
             const volumeSlider = document.getElementById('volumeSlider');
             volumeSlider.addEventListener('input', function() {
                 const volume = this.value;
                 if (player && player.setVolume) {
+                    if (userInteracted) {
+                        player.unMute();
+                    }
                     player.setVolume(volume);
                 }
                 document.getElementById('volumeDisplay').textContent = volume + '%';
@@ -707,7 +743,7 @@
                 updateVolumeSliderBackground(volume);
             });
 
-            // 페이지 로드 후 노래 그리드 생성 및 랜덤 재생
+            // 노래 그리드 생성 및 랜덤 재생
             createSongGrid();
             const randomStart = Math.floor(Math.random() * videos.length);
             playVideo(randomStart);
@@ -791,6 +827,14 @@
             // YouTube IFrame API로 영상 로드
             if (player && player.loadVideoById) {
                 player.loadVideoById(video.id);
+                // 사용자가 이미 상호작용했으면 음소거 해제 상태 유지
+                if (userInteracted) {
+                    const currentVolume = localStorage.getItem('playlistVolume') || 50;
+                    setTimeout(() => {
+                        player.unMute();
+                        player.setVolume(currentVolume);
+                    }, 100);
+                }
             }
             
             document.getElementById('videoTitle').textContent = video.title;
@@ -850,8 +894,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
